@@ -7,6 +7,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.example.employeetestproject.exceptions.UnprocessableEntityException;
+
+import org.apache.commons.validator.routines.EmailValidator;
+
 /**
  * @author Denis Stael
  */
@@ -18,13 +22,12 @@ public class Employee {
 	private String name;
 	private String lastName;
 	private String email;
-	private Integer nisNumber;
+	private String nisNumber;
 
 	public Employee() {
-
 	}
 
-	public Employee(String name, String lastName, String email, int nisNumber) {
+	public Employee(String name, String lastName, String email, String nisNumber) {
 		this.name = name;
 		this.lastName = lastName;
 		this.email = email;
@@ -59,7 +62,7 @@ public class Employee {
 		this.lastName = lastName;
 	}
 
-	@Column(name = "email", nullable = false, unique = true)
+	@Column(name = "email", nullable = false)
 	public String getEmail() {
 		return email;
 	}
@@ -69,12 +72,47 @@ public class Employee {
 	}
 
 	@Column(name = "nis_number", nullable = false)
-	public Integer getNisNumber() {
+	public String getNisNumber() {
 		return nisNumber;
 	}
 
-	public void setNisNumber(Integer nisNumber) {
+	public void setNisNumber(String nisNumber) {
 		this.nisNumber = nisNumber;
+	}
+
+	public void validateModelAttributes() {
+		if (this.name.length() < 2 || this.name.length() > 30) {
+			messageError("Name cannot contain less than 2 or more than 30 characters");
+		}
+
+		if (this.lastName.length() < 2 || this.lastName.length() > 50) {
+			messageError("Last name cannot contain less than 2 or more than 50 characters");
+		}
+
+		if (!emailValidation()) {
+			messageError("Email must be valid");
+		}
+
+		if (!nisNumberOnlyNumbers()) {
+			messageError("NIS/PIS must contain only numbers");
+		}
+	}
+
+	private boolean nisNumberOnlyNumbers() {
+		try {
+			Integer.parseInt(this.nisNumber);
+			return true;
+		} catch (NumberFormatException ex) {
+			return false;
+		}
+	}
+
+	private boolean emailValidation() {
+		return EmailValidator.getInstance().isValid(this.email);
+	}
+
+	private void messageError(String message) {
+		throw new UnprocessableEntityException(message);
 	}
 
 }

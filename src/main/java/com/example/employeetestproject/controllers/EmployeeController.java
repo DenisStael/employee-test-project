@@ -45,6 +45,8 @@ public class EmployeeController {
 	// Create
 	@PostMapping("/employees")
 	Employee newEmployee(@RequestBody Employee employee) {
+		employee.validateModelAttributes();
+
 		return employeePersistence.save(employee);
 	}
 
@@ -71,6 +73,8 @@ public class EmployeeController {
 		if (newEmployee.getNisNumber() != null) {
 			employee.setNisNumber(newEmployee.getNisNumber());
 		}
+
+		employee.validateModelAttributes();
 
 		return employeePersistence.save(employee);
 	}
